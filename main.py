@@ -1,6 +1,6 @@
 from pymongo import MongoClient
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import CommandHandler, ConversationHandler, Filters, MessageHandler, Updater, CallbackQueryHandler
+from telegram.ext import CommandHandler, ConversationHandler, filters, MessageHandler, Updater, CallbackQueryHandler
 from modules.createUser import conversation_handler
 from dotenv import load_dotenv
 import os
