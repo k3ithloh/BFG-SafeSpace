@@ -16,7 +16,8 @@ user = {
     "student": None, # future: if not student then its a counsellor 
     "nickname": None, 
     "gender": None,
-    "happiness": None
+    "happiness": None,
+    'partnerid': None,
 }
 
 # Setting conversation states
@@ -131,7 +132,7 @@ retrieve_data_handler = CommandHandler('retrieve', retrieve_data)
 
 # Create Conversation Handler
 conversation_handler = ConversationHandler(
-    entry_points=[MessageHandler(Filters.command, start)],
+    entry_points=[CommandHandler('start', start)],
     states={
         STUDENTQN: [CallbackQueryHandler(handle_studentqn)],
         GENDERQN: [CallbackQueryHandler(handle_genderqn)],
