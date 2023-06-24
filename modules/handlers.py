@@ -12,9 +12,9 @@ db = mongo_client['SafeSpaceDB']  # Replace 'your_database_name' with your desir
 
 # User Configuration
 user = {
-    "userid": None,
-    "student": None,
-    "name": None,
+    "userid": None, # used to identify user and retrieve data from db on user
+    "student": None, # future: if not student then its a counsellor 
+    "nickname": None, 
     "gender": None,
     "happiness": None
 }
@@ -63,7 +63,7 @@ def handle_genderqn(update, context):
 
 def handle_nameqn(update, context):
     studentQuestion = update.message.text.strip()
-    user['name'] = studentQuestion
+    user['nickname'] = studentQuestion
     context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for updating!")
     context.bot.send_message(chat_id=update.effective_chat.id, text="Next question. On a scale of 1 - 10, how would you rate how happy you are lately? Please enter a whole number from 1 to 10 or 'NA' if you are not comfortable sharing")
     keyboard = [
@@ -88,7 +88,7 @@ def handle_happinessqn(update, context):
     chosen_option = query.data
     user['happiness'] = chosen_option
     context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for updating!")
-    context.bot.send_message(chat_id=update.effective_chat.id, text=f"Account created successfully!\n\nUser ID: {user['userid']}\nStudent: {'Yes' if user['student'] else 'No'}\nName: {user['name']}\nGender: {user['gender']}\nHappiness: {user['happiness']}")
+    context.bot.send_message(chat_id=update.effective_chat.id, text=f"Account created successfully!\n\nUser ID: {user['userid']}\nStudent: {'Yes' if user['student'] else 'No'}\nNickname: {user['nickname']}\nGender: {user['gender']}\nHappiness: {user['happiness']}")
     # Adding to DB
     collection = db['messages']
     collection.insert_one(user)
