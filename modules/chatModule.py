@@ -47,7 +47,7 @@ def match_partner(update: Update, context):
     finalPartner = None
     for item in data:
         # Filtering out those with partners and own user ID
-        if item['partnerid'] is None and item['userid'] != user['userid']:
+        if item['partnerid'] is None and item['userid'] != user['userid'] and item['userid'] not in user['reportedUsers']:
             itemPartner = item['userid']
             # If time difference less than 1 day
             if str(itemPartner) in pastPartners and datetime.now() - pastPartners[str(itemPartner)] <= timedelta(days=1):
@@ -59,7 +59,9 @@ def match_partner(update: Update, context):
                 finalPartner = itemPartner
                 break
     if not matched:
-        print(tempPartners)
+        if tempPartners == []:
+            context.bot.send_message(chat_id=finalPartner, text="No users available at the moment. Please try again later!")
+            return ConversationHandler.END
         random_partner = random.choice(tempPartners)
         collection.update_one({'userid': userid}, {'$set': {'partnerid': random_partner}})
         collection.update_one({'userid': random_partner}, {'$set': {'partnerid': userid}})
