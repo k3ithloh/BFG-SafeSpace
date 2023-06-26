@@ -53,8 +53,8 @@ def handle_evidence(update, context):
     # Notify the reporter that the report has been successfully submitted
     update.message.reply_text("Thank you for your report. It has been successfully submitted.")
     report['reporter'] = update.effective_user.id
-    user = userCollection.find({'userid': update.effective_user.id})
-    partnerid = user.next()['partnerid']
+    user = userCollection.find_one({'userid': update.effective_user.id})
+    partnerid = user['partnerid']
     report['reportee'] = partnerid
     userCollection.update_one(
         {'userid': update.effective_user.id},         {
