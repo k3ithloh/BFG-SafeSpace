@@ -29,7 +29,9 @@ START, STUDENTQN, GENDERQN, NAMEQN, HAPPINESSQN = range(5)
 def start(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="Hello there! Welcome to SafeSpace 💆‍♂️💆‍♀️🏠, we are here to help you with all of your mental health related queries 😊.Please rest assured that in accordance with Singapore's Personal Data Protection Act, we will not be collecting any of your personal data.")
     user['userid'] = update.effective_user.id
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Hello, could I find out more information about you. Are you a Student?")
+    # Add in existing user logic here
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Before we begin, I would like to collect some information from you. If at any point you wish to stop, use the /cancel to stop the process.")
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Let's begin! First I would like to know if you are you a Student?")
     keyboard = [
         [InlineKeyboardButton("Yes", callback_data='Yes')],
         [InlineKeyboardButton("No", callback_data='No')],
@@ -43,8 +45,7 @@ def handle_studentqn(update, context):
     chosen_option = query.data
     user['student'] = chosen_option
     context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for updating!")
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Before we begin, I would like to collect some information from you.")
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Let's begin! May i know your gender?")
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Next, may i know your gender?")
     keyboard = [
         [InlineKeyboardButton("Male", callback_data='Male')],
         [InlineKeyboardButton("Female", callback_data='Female')],
@@ -96,40 +97,12 @@ def handle_happinessqn(update, context):
     collection.insert_one(user)
     return ConversationHandler.END
     
-# start_handler = CommandHandler('start', start)
 
 # Cancel command handler (optional)
 def cancel(update, context):
-    context.bot.send_message(chat_id=update.effective_chat.id, text='Conversation canceled.')
+    context.bot.send_message(chat_id=update.effective_chat.id, text='Account setup canceled.')
     return ConversationHandler.END
 
-# Command to store data in MongoDB
-def store_data(update, context):
-    userid = update.effective_user.id
-    message_text = update.message.text
-
-    # Store data in MongoDB
-    collection = db['messages']
-    collection.insert_one({'userid': userid, 'message': message_text})
-
-    context.bot.send_message(chat_id=update.effective_chat.id, text='Data stored successfully.')
-
-store_data_handler = CommandHandler('store', store_data)
-
-# Command to retrieve data from MongoDB
-def retrieve_data(update, context):
-    userid = update.effective_user.id
-
-    # Retrieve data from MongoDB
-    collection = db['messages']
-    result = collection.find({'userid': userid})
-
-    messages = [doc['message'] for doc in result]
-    response = '\n'.join(messages)
-
-    context.bot.send_message(chat_id=update.effective_chat.id, text=response)
-
-retrieve_data_handler = CommandHandler('retrieve', retrieve_data)
 
 # Create Conversation Handler
 conversation_handler = ConversationHandler(
@@ -140,5 +113,5 @@ conversation_handler = ConversationHandler(
         NAMEQN: [MessageHandler(Filters.text, handle_nameqn)],
         HAPPINESSQN: [CallbackQueryHandler(handle_happinessqn)]
     },
-    fallbacks=[MessageHandler(Filters.command, cancel)],
+    fallbacks=[CommandHandler("cancel", cancel)],
 )
