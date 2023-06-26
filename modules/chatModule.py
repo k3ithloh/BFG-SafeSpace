@@ -20,6 +20,7 @@ collection = db['messages']
 
 # Message handler
 def match_partner(update: Update, context):
+
     context.bot.send_message(chat_id=update.effective_chat.id, text="Matching you with a partner now...")
     # Getting user details
     userid = update.effective_user.id
@@ -46,8 +47,11 @@ def match_partner(update: Update, context):
     matched = False
     finalPartner = None
     for item in data:
+        # logic to determine the suitable happiness level of chat partner
+        # happy match with sad
+        condition = int(item['happiness']) <= 5 if int(user['happiness']) > 5 else int(item['happiness']) > 5
         # Filtering out those with partners and own user ID
-        if item['partnerid'] is None and item['userid'] != user['userid'] and item['userid'] not in user['reportedUsers']:
+        if item['partnerid'] is None and item['userid'] != user['userid'] and item['userid'] not in user['reportedUsers'] and condition:
             itemPartner = item['userid']
             # If time difference less than 1 day
             if str(itemPartner) in pastPartners and datetime.now() - pastPartners[str(itemPartner)] <= timedelta(days=1):
@@ -71,6 +75,7 @@ def match_partner(update: Update, context):
     return
 
 
+
 def handle_message(update: Update, context):
     message = update.message.text
     userid = update.effective_user.id
@@ -83,7 +88,7 @@ def handle_message(update: Update, context):
         context.bot.send_message(chat_id=update.effective_chat.id, text="You have not been matched yet. Please use the command /match to get matched first!")
         return ConversationHandler.END
     else:
-        context.bot.send_message(chat_id=partnerid, text=message)
+        context.bot.send_message(chat_id=partnerid, text=user['nickname'] + ": " + message)
 
 # Define conversation handler for /start command
 chat_handler = ConversationHandler(
