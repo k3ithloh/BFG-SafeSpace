@@ -18,6 +18,7 @@ user = {
     "gender": None,
     "happiness": None,
     'partnerid': None,
+    "reportedUsers": [],
 }
 
 # Setting conversation states
@@ -104,12 +105,12 @@ def cancel(update, context):
 
 # Command to store data in MongoDB
 def store_data(update, context):
-    user_id = update.effective_user.id
+    userid = update.effective_user.id
     message_text = update.message.text
 
     # Store data in MongoDB
     collection = db['messages']
-    collection.insert_one({'user_id': user_id, 'message': message_text})
+    collection.insert_one({'userid': userid, 'message': message_text})
 
     context.bot.send_message(chat_id=update.effective_chat.id, text='Data stored successfully.')
 
@@ -117,11 +118,11 @@ store_data_handler = CommandHandler('store', store_data)
 
 # Command to retrieve data from MongoDB
 def retrieve_data(update, context):
-    user_id = update.effective_user.id
+    userid = update.effective_user.id
 
     # Retrieve data from MongoDB
     collection = db['messages']
-    result = collection.find({'user_id': user_id})
+    result = collection.find({'userid': userid})
 
     messages = [doc['message'] for doc in result]
     response = '\n'.join(messages)
