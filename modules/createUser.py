@@ -71,16 +71,16 @@ def handle_nameqn(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for updating!")
     context.bot.send_message(chat_id=update.effective_chat.id, text="Next question. On a scale of 1 - 10, how would you rate how happy you are lately? Please enter a whole number from 1 to 10 or 'NA' if you are not comfortable sharing")
     keyboard = [
-        [InlineKeyboardButton("1", callback_data='1')],
-        [InlineKeyboardButton("2", callback_data='2')],
-        [InlineKeyboardButton("3", callback_data='3')],
-        [InlineKeyboardButton("4", callback_data='4')],
-        [InlineKeyboardButton("5", callback_data='5')],
-        [InlineKeyboardButton("6", callback_data='6')],
-        [InlineKeyboardButton("7", callback_data='7')],
-        [InlineKeyboardButton("8", callback_data='8')],
-        [InlineKeyboardButton("9", callback_data='9')],
-        [InlineKeyboardButton("10", callback_data='10')],
+        [InlineKeyboardButton("1", callback_data='1'),
+        InlineKeyboardButton("2", callback_data='2'),
+        InlineKeyboardButton("3", callback_data='3'),
+        InlineKeyboardButton("4", callback_data='4'),
+        InlineKeyboardButton("5", callback_data='5')],
+        [InlineKeyboardButton("6", callback_data='6'),
+        InlineKeyboardButton("7", callback_data='7'),
+        InlineKeyboardButton("8", callback_data='8'),
+        InlineKeyboardButton("9", callback_data='9'),
+        InlineKeyboardButton("10", callback_data='10')],
         [InlineKeyboardButton("Not comfortable sharing", callback_data='NA')],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
