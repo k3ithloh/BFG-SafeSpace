@@ -13,34 +13,47 @@ collection = db['messages']
 
 data = collection.find()
 
+
+
 # Message handler
 def match_partner(update: Update, context):
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Matching you with a partner now...")
+
     user_id = update.effective_user.id
+    collection.update_one({'userid': user_id}, {'$set': {'partnerid': None}})
+    user = collection.find_one({'userid': user_id})
     message = update.message.text
 
     # Find the chat partner
-    user = collection.find_one({'userid': user_id})
     partner_id = user['partnerid']
-
+    print(partner_id)
     if partner_id is None:
         # No chat partner yet, pair the user with the next available partner
         for item in data:
             if item['partnerid'] is None and item['userid'] != user['userid']:
                 partner_id = item['userid']
                 collection.update_one({'userid': user_id}, {'$set': {'partnerid': partner_id}})
+                collection.update_one({'userid': partner_id}, {'$set': {'partnerid': user_id}})
                 break
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Matched!")
+    return
+
 
 def handle_message(update: Update, context):
-    if partner_id is not None:
-        # Forward the message to the chat partner
-        context.bot.send_message(chat_id=partner_id, text=message)
+    message = update.message.text
+    user_id = update.effective_user.id
+    user = collection.find_one({'userid': user_id})
+    partner_id = user['partnerid']
+    if partner_id is None:
+        context.bot.send_message(chat_id=update.effective_chat.id, text="You have not been matched yet. Please use the command /match to get matched first!")
     else:
-        # No chat partner available
-        context.bot.send_message(chat_id=update.effective_chat.id, text="Sorry, there are currently no available chat partners. Please try again later.")
+        context.bot.send_message(chat_id=partner_id, text=message)
 
 # Define conversation handler for /start command
-start_handler = ConversationHandler(
+chat_handler = ConversationHandler(
     entry_points=[CommandHandler('match', match_partner)],
     states={},
     fallbacks=[MessageHandler(Filters.text, handle_message)]
 )
+
+message_handler = MessageHandler(Filters.text, handle_message)
