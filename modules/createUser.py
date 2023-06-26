@@ -19,6 +19,7 @@ user = {
     "happiness": None,
     'partnerid': None,
     "reportedUsers": [],
+    "pastPartners": {},
 }
 
 # Setting conversation states
@@ -92,6 +93,8 @@ def handle_happinessqn(update, context):
     user['happiness'] = chosen_option
     context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for updating!")
     context.bot.send_message(chat_id=update.effective_chat.id, text=f"Account created successfully!\n\nUser ID: {user['userid']}\nStudent: {'Yes' if user['student'] else 'No'}\nNickname: {user['nickname']}\nGender: {user['gender']}\nHappiness: {user['happiness']}")
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Try to find a match now with /match! Or you can wait for someone to match you as well.")
+
     # Adding to DB
     collection = db['messages']
     collection.insert_one(user)
