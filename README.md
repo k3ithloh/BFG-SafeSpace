@@ -8,3 +8,12 @@ pip install -r requirements.txt
 ```
 python main.py
 ```
+
+### Docker Method
+```
+docker build -t buildforgoodsafespace .
+```
+
+```
+docker run buildforgoodsafespace
+```
