@@ -30,14 +30,13 @@ def match_partner(update: Update, context):
     # Resetting any existing partner
     collection.update_one({'userid': userid}, {'$set': {'partnerid': None}})
 
-
     # Unmatching the existing partner
     if partnerid is not None:
         # Add to recorded partners
         collection.update_one({'userid': userid}, {'$set': {f'pastPartners.{partnerid}': datetime.now()}})
         collection.update_one({'userid': partnerid}, {'$set': {'partnerid': None, f'pastPartners.{userid}': datetime.now()}})
         context.bot.send_message(chat_id=partnerid, text="Conversation cancelled. Please use /match for a new partner!")
-    
+
     # Matching the user with the next available partner
     data = collection.find()
     # Getting most updated user details
@@ -63,13 +62,14 @@ def match_partner(update: Update, context):
                 finalPartner = itemPartner
                 break
     if not matched:
+        print(tempPartners)
         if tempPartners == []:
             context.bot.send_message(chat_id=update.effective_chat.id, text="No users available at the moment. Please try again later!")
             return ConversationHandler.END
-        random_partner = random.choice(tempPartners)
-        collection.update_one({'userid': userid}, {'$set': {'partnerid': random_partner}})
-        collection.update_one({'userid': random_partner}, {'$set': {'partnerid': userid}})
-        finalPartner = random_partner
+        randomPartner = random.choice(tempPartners)
+        collection.update_one({'userid': userid}, {'$set': {'partnerid': randomPartner}})
+        collection.update_one({'userid': randomPartner}, {'$set': {'partnerid': userid}})
+        finalPartner = randomPartner    
     context.bot.send_message(chat_id=update.effective_chat.id, text="Matched! Say hi to your partner! If at any point your partner does not make you feel comfortable, you can report them by using /report!")
     context.bot.send_message(chat_id=finalPartner, text="Matched! Say hi to your partner! If at any point your partner does not make you feel comfortable, you can report them by using /report!")
     return
@@ -88,11 +88,13 @@ def handle_message(update: Update, context):
         context.bot.send_message(chat_id=update.effective_chat.id, text="You have not been matched yet. Please use the command /match to get matched first!")
         return ConversationHandler.END
     else:
+        print("MY PARTNER:" + str(partnerid))
         context.bot.send_message(chat_id=partnerid, text=user['nickname'] + ": " + message)
+        print("MESSAGE SEND")
 
 # Define conversation handler for /start command
 chat_handler = ConversationHandler(
-    entry_points=[CommandHandler('match', match_partner)],
+    entry_points=[CommandHandler('chat', match_partner)],
     states={},
     fallbacks=[MessageHandler(Filters.text, handle_message)]
 )

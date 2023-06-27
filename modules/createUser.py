@@ -29,9 +29,27 @@ START, STUDENTQN, GENDERQN, NAMEQN, HAPPINESSQN = range(5)
 # Start command handler
 def start(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="Hello there! Welcome to SafeSpace 💆‍♂️💆‍♀️🏠, we are here to help you with all of your mental health related queries 😊.Please rest assured that in accordance with Singapore's Personal Data Protection Act, we will not be collecting any of your personal data.")
-    user['userid'] = update.effective_user.id
-    # Add in existing user logic here
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Before we begin, I would like to collect some information from you. If at any point you wish to stop, use the /cancel to stop the process.")
+    userid = update.effective_user.id
+    user['userid'] = userid
+    collection = db['messages']
+    userquery = collection.find_one({'userid': userid})
+    # Checking if user is already in database
+    if userquery is None:
+        # If user does not exist in database, create a new user
+        context.bot.send_message(chat_id=update.effective_chat.id, text="Before we begin, I would like to collect some information from you. If at any point you wish to stop, use the /cancel to stop the process.")
+        context.bot.send_message(chat_id=update.effective_chat.id, text="Let's begin! First I would like to know if you are you a Student?")
+        keyboard = [
+            [InlineKeyboardButton("Yes", callback_data='Yes')],
+            [InlineKeyboardButton("No", callback_data='No')],
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        context.bot.send_message(chat_id=update.effective_chat.id, text='Are you Student?', reply_markup=reply_markup)
+        return STUDENTQN
+    context.bot.send_message(chat_id=userid, text=f"Welcome back {userquery['nickname']}! If you would like to update your details please use /edit !")
+    return ConversationHandler.END
+
+def handle_account_change(update, context):
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Lets edit your account details. If at any point you wish to stop, use the /cancel to stop the process.")
     context.bot.send_message(chat_id=update.effective_chat.id, text="Let's begin! First I would like to know if you are you a Student?")
     keyboard = [
         [InlineKeyboardButton("Yes", callback_data='Yes')],
@@ -92,12 +110,17 @@ def handle_happinessqn(update, context):
     chosen_option = query.data
     user['happiness'] = chosen_option
     context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for updating!")
-    context.bot.send_message(chat_id=update.effective_chat.id, text=f"Account created successfully!\n\nUser ID: {user['userid']}\nStudent: {'Yes' if user['student'] else 'No'}\nNickname: {user['nickname']}\nGender: {user['gender']}\nHappiness: {user['happiness']}")
+    context.bot.send_message(chat_id=update.effective_chat.id, text=f"Account updated successfully!\n\nUser ID: {user['userid']}\nStudent: {'Yes' if user['student'] else 'No'}\nNickname: {user['nickname']}\nGender: {user['gender']}\nHappiness: {user['happiness']}")
     context.bot.send_message(chat_id=update.effective_chat.id, text="Try to find a match now with /match! Or you can wait for someone to match you as well.")
 
     # Adding to DB
     collection = db['messages']
-    collection.insert_one(user)
+    checkUser = collection.find_one({'userid': user['userid']})
+    if checkUser is not None:
+        user['pastPartners'] = checkUser['pastPartners']
+        user['reportedUsers'] = checkUser['reportedUsers']
+        user['partnerid'] = checkUser['partnerid']
+    collection.update_one({'userid': user['userid']}, {'$set': user}, upsert=True)
     return ConversationHandler.END
     
 
@@ -110,6 +133,17 @@ def cancel(update, context):
 # Create Conversation Handler
 conversation_handler = ConversationHandler(
     entry_points=[CommandHandler('start', start)],
+    states={
+        STUDENTQN: [CallbackQueryHandler(handle_studentqn)],
+        GENDERQN: [CallbackQueryHandler(handle_genderqn)],
+        NAMEQN: [MessageHandler(Filters.text, handle_nameqn)],
+        HAPPINESSQN: [CallbackQueryHandler(handle_happinessqn)]
+    },
+    fallbacks=[CommandHandler("cancel", cancel)],
+)
+
+edit_handler = ConversationHandler(
+    entry_points=[CommandHandler('edit', handle_account_change)],
     states={
         STUDENTQN: [CallbackQueryHandler(handle_studentqn)],
         GENDERQN: [CallbackQueryHandler(handle_genderqn)],
