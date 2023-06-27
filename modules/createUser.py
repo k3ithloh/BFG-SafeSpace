@@ -17,7 +17,8 @@ user = {
     "nickname": None, 
     "gender": None,
     "happiness": None,
-    'partnerid': None,
+    "partnerid": None,
+    "available": False,
     "reportedUsers": [],
     "pastPartners": {},
 }
