@@ -48,10 +48,10 @@ def match_partner(update: Update, context):
     finalPartner = None
     for item in data:
         # logic to determine the suitable happiness level of chat partner
-        # happy match with sad
-        condition = int(item['happiness']) <= 5 if int(user['happiness']) > 5 else int(item['happiness']) > 5
+        # happy match with sad (Comment out temporarily)
+        # condition = int(item['happiness']) <= 5 if int(user['happiness']) > 5 else int(item['happiness']) > 5
         # Filtering out those with partners and own user ID
-        if item['partnerid'] is None and item['userid'] != user['userid'] and item['userid'] not in user['reportedUsers'] and condition:
+        if item['partnerid'] is None and item['userid'] != user['userid'] and item['userid'] not in user['reportedUsers']:
             itemPartner = item['userid']
             # If time difference less than 1 day
             if str(itemPartner) in pastPartners and datetime.now() - pastPartners[str(itemPartner)] <= timedelta(days=1):
