@@ -63,6 +63,7 @@ def match_partner(update: Update, context):
         print(tempPartners)
         if tempPartners == []:
             context.bot.send_message(chat_id=update.effective_chat.id, text="No users available at the moment. Please try again later!")
+            collection.update_one({'userid': userid}, {'$set': {'available': False}})
             return ConversationHandler.END
         randomPartner = random.choice(tempPartners)
         collection.update_one({'userid': userid}, {'$set': {'partnerid': randomPartner}})
