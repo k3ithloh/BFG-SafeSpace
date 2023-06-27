@@ -31,7 +31,7 @@ def match_partner(update: Update, context):
         # Add to recorded partners
         collection.update_one({'userid': userid}, {'$set': {f'pastPartners.{partnerid}': datetime.now()}})
         collection.update_one({'userid': partnerid}, {'$set': {'partnerid': None, f'pastPartners.{userid}': datetime.now()}})
-        context.bot.send_message(chat_id=partnerid, text="Conversation cancelled. Please use /match for a new partner!")
+        context.bot.send_message(chat_id=partnerid, text="Conversation cancelled. Please use /chat for a new partner!")
 
     # Matching the user with the next available partner
     data = collection.find()
@@ -76,8 +76,8 @@ def end_chat(update: Update, context):
     partnerid = user['partnerid']
     collection.update_one({'userid': userid}, {'$set': {'partnerid': None, f'pastPartners.{partnerid}': datetime.now()}})
     collection.update_one({'userid': partnerid}, {'$set': {'partnerid': None, f'pastPartners.{userid}': datetime.now()}})
-    context.bot.send_message(chat_id=userid, text="Conversation cancelled. Please use /match for a new partner!")
-    context.bot.send_message(chat_id=partnerid, text="Conversation cancelled. Please use /match for a new partner!")
+    context.bot.send_message(chat_id=userid, text="Conversation cancelled. Please use /chat for a new partner!")
+    context.bot.send_message(chat_id=partnerid, text="Conversation cancelled. Please use /chat for a new partner!")
     return ConversationHandler.END
 
 def handle_message(update: Update, context):
@@ -89,7 +89,7 @@ def handle_message(update: Update, context):
         return ConversationHandler.END
     partnerid = user['partnerid']
     if partnerid is None:
-        context.bot.send_message(chat_id=update.effective_chat.id, text="You have not been matched yet. Please use the command /match to get matched first!")
+        context.bot.send_message(chat_id=update.effective_chat.id, text="You have not been matched yet. Please use the command /chat to get matched first!")
         return ConversationHandler.END
     else:
         print("MY PARTNER:" + str(partnerid))

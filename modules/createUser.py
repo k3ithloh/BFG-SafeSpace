@@ -87,7 +87,7 @@ def handle_genderqn(update, context):
     chosen_option = query.data
     user['gender'] = chosen_option
     context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for updating!")
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Next question. May i know your Name? Please enter your name or 'NA' if you are not comfortable sharing")
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Next question. Please enter a nickname that you would like to be addressed by. Or type 'NA' if you are not comfortable sharing")
     # track_conversation_history(update, context)
     return NAMEQN
 
@@ -120,7 +120,7 @@ def handle_happinessqn(update, context):
     user['happiness'] = chosen_option
     context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for updating!")
     context.bot.send_message(chat_id=update.effective_chat.id, text=f"Account updated successfully!\n\nUser ID: {user['userid']}\nStudent: {'Yes' if user['student'] else 'No'}\nNickname: {user['nickname']}\nGender: {user['gender']}\nHappiness: {user['happiness']}")
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Try to find a match now with /match! Or you can wait for someone to match you as well.")
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Try to find a match now with /chat! Or you can wait for someone to match you as well.")
 
     # Adding to DB
     collection = db['messages']
