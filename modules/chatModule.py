@@ -21,6 +21,8 @@ def match_partner(update: Update, context):
     # Getting user details
     userid = update.effective_user.id
     user = collection.find_one({'userid': userid})
+    # Set user avaiability to true and update database
+    collection.update_one({'userid': userid}, {'$set': {'available': True}})
     # Find the chat partner
     partnerid = user['partnerid']
     # Resetting any existing partner
@@ -46,7 +48,7 @@ def match_partner(update: Update, context):
         # happy match with sad (Comment out temporarily)
         # condition = int(item['happiness']) <= 5 if int(user['happiness']) > 5 else int(item['happiness']) > 5
         # Filtering out those with partners and own user ID
-        if item['partnerid'] is None and item['userid'] != user['userid'] and item['userid'] not in user['reportedUsers']:
+        if item['partnerid'] is None and item['userid'] != user['userid'] and item['userid'] not in user['reportedUsers'] and item['available'] == True:
             itemPartner = item['userid']
             # If time difference less than 1 day
             if str(itemPartner) in pastPartners and datetime.now() - pastPartners[str(itemPartner)] <= timedelta(days=1):
@@ -74,6 +76,8 @@ def end_chat(update: Update, context):
     userid = update.effective_user.id
     user = collection.find_one({'userid': userid})
     partnerid = user['partnerid']
+    collection.update_one({'userid': userid}, {'$set': {'available': False}})
+    collection.update_one({'userid': partnerid}, {'$set': {'available': False}})
     collection.update_one({'userid': userid}, {'$set': {'partnerid': None, f'pastPartners.{partnerid}': datetime.now()}})
     collection.update_one({'userid': partnerid}, {'$set': {'partnerid': None, f'pastPartners.{userid}': datetime.now()}})
     context.bot.send_message(chat_id=userid, text="Conversation cancelled. Please use /chat for a new partner!")
