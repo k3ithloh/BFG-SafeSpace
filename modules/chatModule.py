@@ -14,10 +14,6 @@ mongo_client = MongoClient(mongo_url)
 db = mongo_client['SafeSpaceDB'] 
 collection = db['messages']
 
-
-
-
-
 # Message handler
 def match_partner(update: Update, context):
 
@@ -74,7 +70,15 @@ def match_partner(update: Update, context):
     context.bot.send_message(chat_id=finalPartner, text="Matched! Say hi to your partner! If at any point your partner does not make you feel comfortable, you can report them by using /report!")
     return
 
-
+def end_chat(update: Update, context):
+    userid = update.effective_user.id
+    user = collection.find_one({'userid': userid})
+    partnerid = user['partnerid']
+    collection.update_one({'userid': userid}, {'$set': {'partnerid': None, f'pastPartners.{partnerid}': datetime.now()}})
+    collection.update_one({'userid': partnerid}, {'$set': {'partnerid': None, f'pastPartners.{userid}': datetime.now()}})
+    context.bot.send_message(chat_id=userid, text="Conversation cancelled. Please use /match for a new partner!")
+    context.bot.send_message(chat_id=partnerid, text="Conversation cancelled. Please use /match for a new partner!")
+    return ConversationHandler.END
 
 def handle_message(update: Update, context):
     message = update.message.text
@@ -96,7 +100,10 @@ def handle_message(update: Update, context):
 chat_handler = ConversationHandler(
     entry_points=[CommandHandler('chat', match_partner)],
     states={},
-    fallbacks=[MessageHandler(Filters.text, handle_message)]
+    fallbacks=[MessageHandler(Filters.text, handle_message)],
 )
 
+end_handler = CommandHandler("end", end_chat)
+
 message_handler = MessageHandler(Filters.text, handle_message)
+
