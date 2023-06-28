@@ -75,7 +75,6 @@ def match_partner(update: Update, context):
 
     # If there are any possible users in the priority group, use them
     if len(firstPartners) != 0:
-        print("First priority group is:" + firstPartners)
         # first partners are already sorted from highest to lowest
         max_difference = float('-inf')
         max_difference_user = None
@@ -90,7 +89,6 @@ def match_partner(update: Update, context):
 
     # If there are any possible users in the lower priority group, use them
     if len(firstPartners) == 0 and len(secondPartners) != 0:
-        print("Second priority group is:" + secondPartners)
         randomPartner = random.choice(secondPartners)
         collection.update_one({'userid': userid}, {'$set': {'partnerid': randomPartner}})
         collection.update_one({'userid': randomPartner}, {'$set': {'partnerid': userid}})
@@ -98,7 +96,6 @@ def match_partner(update: Update, context):
 
     # If there are any possible users in the NA priority group, use them
     if len(firstPartners) == 0 and len(secondPartners) == 0 and len(NAPartners) != 0: 
-        print("NA priority group is:" + NAPartners)
         randomPartner = random.choice(NAPartners)
         collection.update_one({'userid': userid}, {'$set': {'partnerid': randomPartner}})
         collection.update_one({'userid': randomPartner}, {'$set': {'partnerid': userid}})
