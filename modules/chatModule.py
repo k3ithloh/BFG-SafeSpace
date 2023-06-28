@@ -106,7 +106,7 @@ def match_partner(update: Update, context):
 
     # No possible users to match with at all
     if len(firstPartners) == 0 and len(secondPartners) == 0 and len(NAPartners) == 0: 
-        context.bot.send_message(chat_id=update.effective_chat.id, text="No users available at the moment. Please try again later!")
+        context.bot.send_message(chat_id=update.effective_chat.id, text="No users available at the moment. We will match you soon once someone is available!")
         # collection.update_one({'userid': userid}, {'$set': {'available': False}})
         return ConversationHandler.END   
     
