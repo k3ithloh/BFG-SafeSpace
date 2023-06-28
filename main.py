@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 from telegram import Bot, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, ConversationHandler, filters, MessageHandler, Updater, CallbackQueryHandler
-from modules.createUser import conversation_handler, edit_handler
+from modules.createUser import conversation_handler, start_handler
 from modules.chatModule import chat_handler, message_handler, end_handler
 from modules.reportUser import report_handler
 from modules.deleteUser import delete_handler
@@ -21,7 +21,7 @@ def main():
     dispatcher.add_handler(report_handler) 
     dispatcher.add_handler(end_handler)
     dispatcher.add_handler(conversation_handler)
-    dispatcher.add_handler(edit_handler)
+    dispatcher.add_handler(start_handler)
     dispatcher.add_handler(chat_handler)
     dispatcher.add_handler(message_handler)
     
