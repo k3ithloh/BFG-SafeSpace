@@ -104,14 +104,18 @@ def handle_message(update: Update, context):
         context.bot.send_message(chat_id=partnerid, text=user['nickname'] + ": " + message)
         print("MESSAGE SEND")
 
-# Define conversation handler for /start command
+# Define conversation handler for /begin command
 chat_handler = ConversationHandler(
     entry_points=[CommandHandler('begin', match_partner)],
     states={},
-    fallbacks=[MessageHandler(Filters.text, handle_message)],
+    fallbacks=[],
 )
 
 end_handler = CommandHandler("end", end_chat)
 
-message_handler = MessageHandler(Filters.text, handle_message)
+message_handler = ConversationHandler(
+    entry_points=[MessageHandler(Filters.text, handle_message)],
+    states={},
+    fallbacks=[],
+)
 

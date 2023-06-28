@@ -16,11 +16,12 @@ def main():
     dispatcher = updater.dispatcher
 
     # Add the handlers to the dispatcher ORDER OF HANDLERS MATTER
+
+    dispatcher.add_handler(creation_handler)
     dispatcher.add_handler(view_handler)
     dispatcher.add_handler(delete_handler)
     dispatcher.add_handler(report_handler) 
     dispatcher.add_handler(end_handler)
-    dispatcher.add_handler(creation_handler)
     dispatcher.add_handler(start_handler)
     dispatcher.add_handler(chat_handler)
     dispatcher.add_handler(message_handler)

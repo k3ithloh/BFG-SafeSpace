@@ -136,11 +136,6 @@ def handle_completed(update, context):
     # Adding to DB
     collection = db['messages']
     checkUser = collection.find_one({'userid': user['userid']})
-    if checkUser is not None:
-        user['pastPartners'] = checkUser['pastPartners']
-        user['reportedUsers'] = checkUser['reportedUsers']
-        user['partnerid'] = checkUser['partnerid']
-    collection.update_one({'userid': user['userid']}, {'$set': user}, upsert=True)
     # Resetting user variable
     user['userid'] = None
     user['student'] = None
@@ -150,10 +145,30 @@ def handle_completed(update, context):
     user['pastPartners'] = {}
     user['reportedUsers'] = []
     user['partnerid'] = None
+    if checkUser is not None:
+        user['pastPartners'] = checkUser['pastPartners']
+        user['reportedUsers'] = checkUser['reportedUsers']
+        user['partnerid'] = checkUser['partnerid']
+    collection.update_one({'userid': user['userid']}, {'$set': user}, upsert=True)
+
     return ConversationHandler.END
 
-# Cancel command handler (optional)
 def cancel(update, context):
+    collection = db['messages']
+    checkUser = collection.find_one({'userid': user['userid']})
+    # Resetting user variable
+    user['userid'] = None
+    user['student'] = None
+    user['nickname'] = None
+    user['gender'] = None
+    user['happiness'] = None
+    user['pastPartners'] = {}
+    user['reportedUsers'] = []
+    user['partnerid'] = None
+    if checkUser is not None:
+        user['pastPartners'] = checkUser['pastPartners']
+        user['reportedUsers'] = checkUser['reportedUsers']
+        user['partnerid'] = checkUser['partnerid']
     context.bot.send_message(chat_id=update.effective_chat.id, text='Account setup canceled.')
     return ConversationHandler.END
 
@@ -171,7 +186,12 @@ creation_handler = ConversationHandler(
     fallbacks=[CommandHandler("cancel", cancel)],
 )
 
-start_handler = CommandHandler('start', start)
+start_handler = ConversationHandler(
+    entry_points=[CommandHandler('start', start)],
+    states={        
+    },
+    fallbacks=[],
+)
 
 
 
