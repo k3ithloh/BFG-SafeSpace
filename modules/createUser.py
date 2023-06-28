@@ -130,6 +130,7 @@ def handle_happinessqn(update, context):
     return controller(update, context)
     
 def handle_completed(update, context):
+    user['userid'] = update.effective_user.id
     context.bot.send_message(chat_id=update.effective_chat.id, text=f"Account updated successfully!\n\nUser ID: {user['userid']}\nStudent: {'Yes' if user['student'] else 'No'}\nNickname: {user['nickname']}\nGender: {user['gender']}\nHappiness: {user['happiness']}")
     context.bot.send_message(chat_id=update.effective_chat.id, text="Try to find a match now with /begin!")
     # Adding to DB
@@ -140,6 +141,18 @@ def handle_completed(update, context):
         user['reportedUsers'] = checkUser['reportedUsers']
         user['partnerid'] = checkUser['partnerid']
     collection.update_one({'userid': user['userid']}, {'$set': user}, upsert=True)
+    # Resetting user variable
+    user = {
+        "userid": None, # used to identify user and retrieve data from db on user
+        "student": None, # future: if not student then its a counsellor 
+        "nickname": None, 
+        "gender": None,
+        "happiness": None,
+        "partnerid": None,
+        "available": False,
+        "reportedUsers": [],
+        "pastPartners": {},
+    }
     return ConversationHandler.END
 
 # Cancel command handler (optional)
