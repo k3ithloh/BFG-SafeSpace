@@ -56,7 +56,7 @@ def control_handler(update, context):
         gender_keyboard = [
             [InlineKeyboardButton("Male", callback_data='Male')],
             [InlineKeyboardButton("Female", callback_data='Female')],
-            [InlineKeyboardButton("Not comfortable sharing", callback_data='NA')],
+            [InlineKeyboardButton("Prefer not to share", callback_data='NA')],
         ]
         gender_markup = InlineKeyboardMarkup(gender_keyboard)
         context.bot.send_message(chat_id=update.effective_chat.id, text='What is your gender?', reply_markup=gender_markup)
@@ -70,7 +70,7 @@ def control_handler(update, context):
         context.bot.send_message(chat_id=update.effective_chat.id, text='Are you Student?', reply_markup=student_markup)
         return STUDENTQN
     if chosen_option == 'nickname':
-        context.bot.send_message(chat_id=update.effective_chat.id, text="Please enter a nickname that you would like to be addressed by. Or type 'NA' if you are not comfortable sharing")
+        context.bot.send_message(chat_id=update.effective_chat.id, text="Please enter a nickname that you would like to be addressed by. Or type 'NA' if you prefer not to say")
         return NAMEQN
     if chosen_option == 'happiness':
         happiness_keyboard = [
@@ -84,7 +84,7 @@ def control_handler(update, context):
             InlineKeyboardButton("8", callback_data='8'),
             InlineKeyboardButton("9", callback_data='9'),
             InlineKeyboardButton("10", callback_data='10')],
-            [InlineKeyboardButton("Not comfortable sharing", callback_data='NA')],
+            [InlineKeyboardButton("Prefer not to say", callback_data='NA')],
         ]
         happiness_markup = InlineKeyboardMarkup(happiness_keyboard)
         context.bot.send_message(chat_id=update.effective_chat.id, text='On a scale of 1 - 10, how would you rate how happy you are lately?', reply_markup=happiness_markup)
