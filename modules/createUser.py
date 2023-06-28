@@ -137,6 +137,11 @@ def handle_completed(update, context):
     collection = db['messages']
     checkUser = collection.find_one({'userid': user['userid']})
     # Resetting user variable
+    if checkUser is not None:
+        user['pastPartners'] = checkUser['pastPartners']
+        user['reportedUsers'] = checkUser['reportedUsers']
+        user['partnerid'] = checkUser['partnerid']
+    collection.update_one({'userid': user['userid']}, {'$set': user}, upsert=True)
     user['userid'] = None
     user['student'] = None
     user['nickname'] = None
@@ -145,11 +150,6 @@ def handle_completed(update, context):
     user['pastPartners'] = {}
     user['reportedUsers'] = []
     user['partnerid'] = None
-    if checkUser is not None:
-        user['pastPartners'] = checkUser['pastPartners']
-        user['reportedUsers'] = checkUser['reportedUsers']
-        user['partnerid'] = checkUser['partnerid']
-    collection.update_one({'userid': user['userid']}, {'$set': user}, upsert=True)
 
     return ConversationHandler.END
 
