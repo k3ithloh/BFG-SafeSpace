@@ -142,17 +142,14 @@ def handle_completed(update, context):
         user['partnerid'] = checkUser['partnerid']
     collection.update_one({'userid': user['userid']}, {'$set': user}, upsert=True)
     # Resetting user variable
-    user = {
-        "userid": None, # used to identify user and retrieve data from db on user
-        "student": None, # future: if not student then its a counsellor 
-        "nickname": None, 
-        "gender": None,
-        "happiness": None,
-        "partnerid": None,
-        "available": False,
-        "reportedUsers": [],
-        "pastPartners": {},
-    }
+    user['userid'] = None
+    user['student'] = None
+    user['nickname'] = None
+    user['gender'] = None
+    user['happiness'] = None
+    user['pastPartners'] = {}
+    user['reportedUsers'] = []
+    user['partnerid'] = None
     return ConversationHandler.END
 
 # Cancel command handler (optional)
