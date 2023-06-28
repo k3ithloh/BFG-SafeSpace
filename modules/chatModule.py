@@ -80,6 +80,7 @@ def match_partner(update: Update, context):
         max_difference_user = None
         for partnerid, partnerHappiness in firstPartners:
             difference = abs(partnerHappiness - userHappiness)
+            # Match partner if same issue
             if difference > max_difference:
                 max_difference = difference
                 max_difference_user = partnerid
@@ -107,8 +108,8 @@ def match_partner(update: Update, context):
         # collection.update_one({'userid': userid}, {'$set': {'available': False}})
         return ConversationHandler.END   
     
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Matched! Say hi to your partner! If at any point your partner does not make you feel comfortable, you can report them by using /report!")
-    context.bot.send_message(chat_id=finalPartner, text="Matched! Say hi to your partner! If at any point your partner does not make you feel comfortable, you can report them by using /report!")
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Matched! You can now say hi to your partner in this chat! If at any point your partner does not make you feel comfortable, you can report them using /report!")
+    context.bot.send_message(chat_id=finalPartner, text="Matched! You can now say hi to your partner in this chat! If at any point your partner does not make you feel comfortable, you can report them using /report!")
     return
 
 def end_chat(update: Update, context):
@@ -119,8 +120,8 @@ def end_chat(update: Update, context):
     collection.update_one({'userid': partnerid}, {'$set': {'available': False}})
     collection.update_one({'userid': userid}, {'$set': {'partnerid': None, f'pastPartners.{partnerid}': datetime.now()}})
     collection.update_one({'userid': partnerid}, {'$set': {'partnerid': None, f'pastPartners.{userid}': datetime.now()}})
-    context.bot.send_message(chat_id=userid, text="Conversation cancelled. Please use /begin for a new partner!")
-    context.bot.send_message(chat_id=partnerid, text="Conversation cancelled. Please use /begin for a new partner!")
+    context.bot.send_message(chat_id=userid, text="Conversation cancelled. Please use /begin to look for a new partner!")
+    context.bot.send_message(chat_id=partnerid, text="Conversation cancelled. Please use /begin to look for a new partner!")
     return ConversationHandler.END
 
 def handle_message(update: Update, context):

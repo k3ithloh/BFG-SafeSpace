@@ -32,7 +32,7 @@ START, STUDENTQN, GENDERQN, NAMEQN, HAPPINESSQN, CONTROLLERHANDLER = range(6)
 # Start command handler
 def start(update, context):
     # state_history.clear()  # Clear state history when starting account change
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Hello there! Welcome to SafeSpace 💆‍♂️💆‍♀️🏠, we are here to help you with all of your mental health related queries 😊.Please rest assured that in accordance with Singapore's Personal Data Protection Act, we will not be collecting any of your personal data. You can create your new account using /setup")
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Hello there! Welcome to SafeSpace 💆‍♂️💆‍♀️🏠, we are here to help you with all of your mental health related queries 😊. Please rest assured that in accordance with Singapore's Personal Data Protection Act, we will not be collecting any of your personal data. You can create your new account using /setup")
     return ConversationHandler.END
 
 def controller(update, context):
@@ -44,7 +44,7 @@ def controller(update, context):
         [InlineKeyboardButton("Complete", callback_data='complete')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    context.bot.send_message(chat_id=update.effective_chat.id, text='Let us start setting up your account!', reply_markup=reply_markup)
+    context.bot.send_message(chat_id=update.effective_chat.id, text='Let us begin setting up your account!', reply_markup=reply_markup)
     return CONTROLLERHANDLER
 
 def control_handler(update, context):
@@ -67,10 +67,10 @@ def control_handler(update, context):
             [InlineKeyboardButton("No", callback_data='No')],
         ]
         student_markup = InlineKeyboardMarkup(student_keyboard)
-        context.bot.send_message(chat_id=update.effective_chat.id, text='Are you Student?', reply_markup=student_markup)
+        context.bot.send_message(chat_id=update.effective_chat.id, text='Are you a student?', reply_markup=student_markup)
         return STUDENTQN
     if chosen_option == 'nickname':
-        context.bot.send_message(chat_id=update.effective_chat.id, text="Please enter a nickname that you would like to be addressed by. Or type 'NA' if you prefer not to say")
+        context.bot.send_message(chat_id=update.effective_chat.id, text="Please enter a nickname that you would like to be addressed by. Or type 'NA' if you prefer not to say.")
         return NAMEQN
     if chosen_option == 'happiness':
         happiness_keyboard = [
@@ -169,7 +169,7 @@ def cancel(update, context):
         user['pastPartners'] = checkUser['pastPartners']
         user['reportedUsers'] = checkUser['reportedUsers']
         user['partnerid'] = checkUser['partnerid']
-    context.bot.send_message(chat_id=update.effective_chat.id, text='Account setup canceled.')
+    context.bot.send_message(chat_id=update.effective_chat.id, text='Account setup cancelled.')
     return ConversationHandler.END
 
 
