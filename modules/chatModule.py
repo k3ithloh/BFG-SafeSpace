@@ -16,7 +16,10 @@ collection = db['messages']
 
 # Message handler
 def match_partner(update: Update, context):
-
+    checkUser = collection.find_one({'userid': update.effective_user.id})
+    if checkUser is None:
+        context.bot.send_message(chat_id=update.effective_chat.id, text="Your account has not been created yet. Please use the command /setup to create first!")
+        return ConversationHandler.END
     context.bot.send_message(chat_id=update.effective_chat.id, text="Matching you with a partner now...")
     # Getting user details
     userid = update.effective_user.id
