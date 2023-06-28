@@ -33,7 +33,7 @@ def match_partner(update: Update, context):
         # Add to recorded partners
         collection.update_one({'userid': userid}, {'$set': {f'pastPartners.{partnerid}': datetime.now()}})
         collection.update_one({'userid': partnerid}, {'$set': {'partnerid': None, f'pastPartners.{userid}': datetime.now()}})
-        context.bot.send_message(chat_id=partnerid, text="Conversation cancelled. Please use /chat for a new partner!")
+        context.bot.send_message(chat_id=partnerid, text="Conversation cancelled. Please use /begin for a new partner!")
 
     # Matching the user with the next available partner
     data = collection.find()
@@ -81,8 +81,8 @@ def end_chat(update: Update, context):
     collection.update_one({'userid': partnerid}, {'$set': {'available': False}})
     collection.update_one({'userid': userid}, {'$set': {'partnerid': None, f'pastPartners.{partnerid}': datetime.now()}})
     collection.update_one({'userid': partnerid}, {'$set': {'partnerid': None, f'pastPartners.{userid}': datetime.now()}})
-    context.bot.send_message(chat_id=userid, text="Conversation cancelled. Please use /chat for a new partner!")
-    context.bot.send_message(chat_id=partnerid, text="Conversation cancelled. Please use /chat for a new partner!")
+    context.bot.send_message(chat_id=userid, text="Conversation cancelled. Please use /begin for a new partner!")
+    context.bot.send_message(chat_id=partnerid, text="Conversation cancelled. Please use /begin for a new partner!")
     return ConversationHandler.END
 
 def handle_message(update: Update, context):
@@ -90,11 +90,11 @@ def handle_message(update: Update, context):
     userid = update.effective_user.id
     user = collection.find_one({'userid': userid})
     if user is None:
-        context.bot.send_message(chat_id=update.effective_chat.id, text="Your account has not been created yet. Please use the command /start to create first!")
+        context.bot.send_message(chat_id=update.effective_chat.id, text="Your account has not been created yet. Please use the command /setup to create first!")
         return ConversationHandler.END
     partnerid = user['partnerid']
     if partnerid is None:
-        context.bot.send_message(chat_id=update.effective_chat.id, text="You have not been matched yet. Please use the command /chat to get matched first!")
+        context.bot.send_message(chat_id=update.effective_chat.id, text="You have not been matched yet. Please use the command /begin to get matched first!")
         return ConversationHandler.END
     else:
         print("MY PARTNER:" + str(partnerid))
@@ -103,7 +103,7 @@ def handle_message(update: Update, context):
 
 # Define conversation handler for /start command
 chat_handler = ConversationHandler(
-    entry_points=[CommandHandler('chat', match_partner)],
+    entry_points=[CommandHandler('begin', match_partner)],
     states={},
     fallbacks=[MessageHandler(Filters.text, handle_message)],
 )

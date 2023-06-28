@@ -62,8 +62,8 @@ def handle_evidence(update, context):
             '$push': {'reportedUsers': partnerid}
         }, upsert=True)
     userCollection.update_one({'userid': partnerid}, {'$set': {'partnerid': None}})
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Conversation cancelled. Please use /chat for a new partner!")
-    context.bot.send_message(chat_id=partnerid, text="Conversation cancelled. Please use /chat for a new partner!")
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Conversation cancelled. Please use /begin for a new partner!")
+    context.bot.send_message(chat_id=partnerid, text="Conversation cancelled. Please use /begin for a new partner!")
     report['datetime'] = datetime.now()
     reportCollection.insert_one(report)
     return ConversationHandler.END
