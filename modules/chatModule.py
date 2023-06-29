@@ -77,14 +77,14 @@ def match_partner(update: Update, context):
 
     # Getting most updated user details
     user = collection.find_one({'userid': userid})
-    userHappiness = int(user['happiness'])
+    # userHappiness = int(user['happiness'])
     pastPartners = user['pastPartners']
     secondPartners = []
     firstPartners = []
     # NAPartners = []
     finalPartner = None
-    userConcern = user['concern']
-    userAgeRange = user['ageRange']
+    # userConcern = user['concern']
+    # userAgeRange = user['ageRange']
     for item in data:
         # logic to determine the suitable happiness level of chat partner
         # Filtering out those with partners and own user ID
@@ -140,16 +140,22 @@ def matching_algo(array, user):
         currentArray = sameAgeRange
 
     # first partners are already sorted from highest to lowest
-    max_difference = float('-inf')
+    # max_difference = float('-inf')
     max_difference_user = None
-    for partner in currentArray:
-        partnerHappiness = partner['happiness_numeric']
-        partnerid = partner['userid']
-        difference = abs(partnerHappiness - userHappiness)
-        # Match partner if same issue
-        if difference > max_difference:
-            max_difference = difference
-            max_difference_user = partnerid
+    happiest = currentArray[0]
+    saddest = currentArray[-1]
+    if abs(userHappiness - happiest['happiness_numeric']) >= abs(userHappiness - saddest['happiness_numeric']):
+        max_difference_user = happiest['userid']
+    else:
+        max_difference_user = saddest['userid']
+    # for partner in currentArray:
+    #     partnerHappiness = partner['happiness_numeric']
+    #     partnerid = partner['userid']
+    #     difference = abs(partnerHappiness - userHappiness)
+    #     # Match partner if same issue
+    #     if difference > max_difference:
+    #         max_difference = difference
+    #         max_difference_user = partnerid
     collection.update_one({'userid': userid}, {'$set': {'partnerid': max_difference_user}})
     collection.update_one({'userid': max_difference_user}, {'$set': {'partnerid': userid}})
     return max_difference_user
