@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from googleapiclient import discovery
 
-import json
+
 import os
 import random
 load_dotenv()

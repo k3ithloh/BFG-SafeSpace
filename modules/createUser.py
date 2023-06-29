@@ -2,6 +2,8 @@ from pymongo import MongoClient
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import CommandHandler, ConversationHandler, Filters, MessageHandler, CallbackQueryHandler
 from dotenv import load_dotenv
+from googleapiclient import discovery
+
 import os
 load_dotenv()
 
@@ -9,6 +11,20 @@ load_dotenv()
 mongo_url = os.environ.get('MONGODB_URL')
 mongo_client = MongoClient(mongo_url)
 db = mongo_client['SafeSpaceDB']  # Replace 'your_database_name' with your desired database name
+
+# Google Cloud API configuration
+API_KEY = os.environ.get('API_KEY')
+client = discovery.build(
+  "commentanalyzer",
+  "v1alpha1",
+  developerKey=API_KEY,
+  discoveryServiceUrl="https://commentanalyzer.googleapis.com/$discovery/rest?version=v1alpha1",
+  static_discovery=False,
+)
+
+# Import badwords list
+with open('badwords.txt', 'r') as f:
+    bad_words = [word.strip().lower() for word in f.readlines()]
 
 # User Configuration
 user = {
@@ -31,6 +47,15 @@ START, STUDENTQN, GENDERQN, NAMEQN, HAPPINESSQN, CONTROLLERHANDLER, AGEQN, CHALL
 
 # # Conversation state history
 # state_history = []
+
+def check_vulgarity(text):
+    analyze_request = {
+        'comment': { 'text': text },
+        'requestedAttributes': {'PROFANITY': {}}
+    }
+    response = client.comments().analyze(body=analyze_request).execute()
+    score = response['attributeScores']['PROFANITY']['summaryScore']['value']
+    return score > 0.70 
 
 # Start command handler
 def start(update, context):
@@ -162,6 +187,19 @@ def handle_nameqn(update, context):
     if givenNickname == '/reset':
         reset(update, context)
         return ConversationHandler.END
+    if any(bad_word in givenNickname.lower() for bad_word in bad_words):
+        try:
+            if check_vulgarity(givenNickname):
+                context.bot.send_message(chat_id=update.effective_chat.id, text="Inappropriate Nickname, please use another nickname.")
+                return NAMEQN
+            else:
+                collection = db['messages']
+                collection.update_one({'userid': update.effective_chat.id}, {'$set': {'nickname': givenNickname}})
+                context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for updating!")
+                return controller(update, context)
+        except:
+            context.bot.send_message(chat_id=update.effective_chat.id, text="test - Inappropriate Nickanme, please use another nickname.")
+            return NAMEQN
     collection = db['messages']
     collection.update_one({'userid': update.effective_chat.id}, {'$set': {'nickname': givenNickname}})
     context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for updating!")
