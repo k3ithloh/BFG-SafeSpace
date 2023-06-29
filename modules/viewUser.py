@@ -13,7 +13,9 @@ collection = db['messages']
 
 def view_user(update, context):
     user = collection.find_one({'userid': update.effective_chat.id})
-    context.bot.send_message(chat_id=update.effective_chat.id, text=f"User account request successful!\n\nUser ID: {user['userid']}\nStudent: {'Yes' if user['student'] else 'No'}\nNickname: {user['nickname']}\nGender: {user['gender']}\nHappiness: {user['happiness']}")
+    lessthan = "<"
+    morethan = ">"
+    context.bot.send_message(chat_id=update.effective_chat.id, text=f"User account request successful!\n\n\nUser ID: {user['userid']}\nStudent: {user['student']}\nNickname: {user['nickname']}\nGender: {user['gender']}\nHappiness: {user['happiness']} \nAge: {lessthan + '15' if user['ageRange'] == 0 else '16-18' if user['ageRange'] == 1 else '19-21' if user['ageRange'] == 2 else '22-25' if user['ageRange'] == 3 else morethan + '25'}\nConcern: {user['concern']}")
     context.bot.send_message(chat_id=update.effective_chat.id, text=f"To edit your account use /setup!")
 
     return ConversationHandler.END
