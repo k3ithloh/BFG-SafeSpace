@@ -100,7 +100,6 @@ def control_handler(update, context):
             InlineKeyboardButton("8", callback_data='8'),
             InlineKeyboardButton("9", callback_data='9'),
             InlineKeyboardButton("10", callback_data='10')],
-            [InlineKeyboardButton("Prefer not to say", callback_data='NA')],
         ]
         happiness_markup = InlineKeyboardMarkup(happiness_keyboard)
         context.bot.send_message(chat_id=update.effective_chat.id, text=f'__*{chosen_option.capitalize()}*__\n\nOn a scale of 1 \- 10, how would you rate how happy you are lately?', reply_markup=happiness_markup, parse_mode='MarkdownV2')

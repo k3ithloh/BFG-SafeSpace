@@ -42,23 +42,20 @@ def match_partner(update: Update, context):
         {
             '$addFields': {
                 'happiness_numeric': {
-                    '$cond': {
-                        'if': { '$eq': ['$happiness', 'NA'] },
-                        'then': -1,  # Assign a lower value for 'NA'
-                        'else': { '$toInt': '$happiness' }  # Convert other values to numeric
-                    }
+                    '$toInt': '$happiness'  # Convert the 'happiness' field to an integer
                 }
             }
         },
         { '$sort': { 'happiness_numeric': -1 } }  # Sort by 'happiness_numeric' field in descending order
     ])
+
     # Getting most updated user details
     user = collection.find_one({'userid': userid})
     userHappiness = int(user['happiness'])
     pastPartners = user['pastPartners']
     secondPartners = []
     firstPartners = []
-    NAPartners = []
+    # NAPartners = []
     finalPartner = None
     userConcern = user['concern']
     userAgeRange = user['ageRange']
@@ -70,8 +67,8 @@ def match_partner(update: Update, context):
             # If time difference less than 1 day (Lower priority group)
             if str(itemPartner) in pastPartners and datetime.now() - pastPartners[str(itemPartner)] <= timedelta(days=1):
                 secondPartners.append(item)
-            elif item['happiness_numeric'] == -1: # NA Happiness group
-                NAPartners.append(item)
+            # elif item['happiness_numeric'] == -1: # NA Happiness group
+            #     NAPartners.append(item)
             else:
                 firstPartners.append(item)
     # If there are any possible users in the priority group, use them
@@ -83,9 +80,9 @@ def match_partner(update: Update, context):
     if len(firstPartners) == 0 and len(secondPartners) != 0:
         finalPartner = matching_algo(secondPartners, user)
 
-    # If there are any possible users in the NA priority group, use them
-    if len(firstPartners) == 0 and len(secondPartners) == 0 and len(NAPartners) != 0: 
-        finalPartner = matching_algo(NAPartners, user)
+    # # If there are any possible users in the NA priority group, use them
+    # if len(firstPartners) == 0 and len(secondPartners) == 0 and len(NAPartners) != 0: 
+    #     finalPartner = matching_algo(NAPartners, user)
 
     # No possible users to match with at all
     if finalPartner == None: 
