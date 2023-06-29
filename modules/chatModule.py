@@ -60,6 +60,8 @@ def match_partner(update: Update, context):
     firstPartners = []
     NAPartners = []
     finalPartner = None
+    userChallenge = user['challenge']
+    userAgeRange = user['ageRange']
     for item in data:
         # logic to determine the suitable happiness level of chat partner
         # Filtering out those with partners and own user ID
@@ -67,43 +69,26 @@ def match_partner(update: Update, context):
             itemPartner = item['userid']
             # If time difference less than 1 day (Lower priority group)
             if str(itemPartner) in pastPartners and datetime.now() - pastPartners[str(itemPartner)] <= timedelta(days=1):
-                secondPartners.append(itemPartner)
+                secondPartners.append(item)
             elif item['happiness_numeric'] == -1: # NA Happiness group
-                NAPartners.append(itemPartner)
+                NAPartners.append(item)
             else:
-                firstPartners.append((itemPartner, item['happiness_numeric']))
-
+                firstPartners.append(item)
     # If there are any possible users in the priority group, use them
+
     if len(firstPartners) != 0:
-        # first partners are already sorted from highest to lowest
-        max_difference = float('-inf')
-        max_difference_user = None
-        for partnerid, partnerHappiness in firstPartners:
-            difference = abs(partnerHappiness - userHappiness)
-            # Match partner if same issue
-            if difference > max_difference:
-                max_difference = difference
-                max_difference_user = partnerid
-        collection.update_one({'userid': userid}, {'$set': {'partnerid': max_difference_user}})
-        collection.update_one({'userid': max_difference_user}, {'$set': {'partnerid': userid}})
-        finalPartner = max_difference_user
+        finalPartner = matching_algo(firstPartners, user)
 
     # If there are any possible users in the lower priority group, use them
     if len(firstPartners) == 0 and len(secondPartners) != 0:
-        randomPartner = random.choice(secondPartners)
-        collection.update_one({'userid': userid}, {'$set': {'partnerid': randomPartner}})
-        collection.update_one({'userid': randomPartner}, {'$set': {'partnerid': userid}})
-        finalPartner = randomPartner 
+        finalPartner = matching_algo(secondPartners, user)
 
     # If there are any possible users in the NA priority group, use them
     if len(firstPartners) == 0 and len(secondPartners) == 0 and len(NAPartners) != 0: 
-        randomPartner = random.choice(NAPartners)
-        collection.update_one({'userid': userid}, {'$set': {'partnerid': randomPartner}})
-        collection.update_one({'userid': randomPartner}, {'$set': {'partnerid': userid}})
-        finalPartner = randomPartner 
+        finalPartner = matching_algo(NAPartners, user)
 
     # No possible users to match with at all
-    if len(firstPartners) == 0 and len(secondPartners) == 0 and len(NAPartners) == 0: 
+    if finalPartner == None: 
         context.bot.send_message(chat_id=update.effective_chat.id, text="No users available at the moment. We will match you soon once someone is available!")
         # collection.update_one({'userid': userid}, {'$set': {'available': False}})
         return ConversationHandler.END   
@@ -111,6 +96,41 @@ def match_partner(update: Update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="Matched! You can now say hi to your partner in this chat! If at any point your partner does not make you feel comfortable, you can report them using /report!")
     context.bot.send_message(chat_id=finalPartner, text="Matched! You can now say hi to your partner in this chat! If at any point your partner does not make you feel comfortable, you can report them using /report!")
     return
+
+def matching_algo(array, user):
+    userHappiness = int(user['happiness'])
+    userid = user['userid']
+    userChallenge = user['challenge']
+    userAgeRange = user['ageRange']
+    sameChallenge = []
+    sameAgeRange = []
+    currentArray = array
+    for item in currentArray:
+        if item['challenge'] == userChallenge:
+            sameChallenge.append(item)
+    if len(sameChallenge) != 0:
+        currentArray = sameChallenge
+    for item in currentArray:
+        if int(item['ageRange']) - 1 <= int(userAgeRange) <= int(item['ageRange']) + 1:
+            sameAgeRange.append(item)
+    if len(sameAgeRange) != 0:
+        currentArray = sameAgeRange
+
+    # first partners are already sorted from highest to lowest
+    max_difference = float('-inf')
+    max_difference_user = None
+    for partner in currentArray:
+        partnerHappiness = partner['happiness_numeric']
+        partnerid = partner['userid']
+        difference = abs(partnerHappiness - userHappiness)
+        # Match partner if same issue
+        if difference > max_difference:
+            max_difference = difference
+            max_difference_user = partnerid
+    collection.update_one({'userid': userid}, {'$set': {'partnerid': max_difference_user}})
+    collection.update_one({'userid': max_difference_user}, {'$set': {'partnerid': userid}})
+    return max_difference_user
+
 
 def end_chat(update: Update, context):
     userid = update.effective_user.id
