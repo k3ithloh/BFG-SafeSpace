@@ -3,6 +3,9 @@ from telegram import Update
 from telegram.ext import CommandHandler, ConversationHandler, Filters, MessageHandler, CallbackQueryHandler
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
+from googleapiclient import discovery
+
+import json
 import os
 import random
 load_dotenv()
@@ -12,6 +15,26 @@ mongo_url = os.environ.get('MONGODB_URL')
 mongo_client = MongoClient(mongo_url)
 db = mongo_client['SafeSpaceDB'] 
 collection = db['messages']
+
+# Google Cloud API configuration
+API_KEY = os.environ.get('API_KEY')
+client = discovery.build(
+  "commentanalyzer",
+  "v1alpha1",
+  developerKey=API_KEY,
+  discoveryServiceUrl="https://commentanalyzer.googleapis.com/$discovery/rest?version=v1alpha1",
+  static_discovery=False,
+)
+
+
+def check_profanity(text):
+    analyze_request = {
+        'comment': { 'text': text },
+        'requestedAttributes': {'TOXICITY': {}}
+    }
+    response = client.comments().analyze(body=analyze_request).execute()
+    score = response['attributeScores']['TOXICITY']['summaryScore']['value']
+    return score > 0.7  # Change the threshold based on your requirements
 
 # Message handler
 def match_partner(update: Update, context):
@@ -135,9 +158,11 @@ def handle_message(update: Update, context):
         context.bot.send_message(chat_id=update.effective_chat.id, text="You have not been matched yet. Please use the command /begin to get matched first!")
         return ConversationHandler.END
     else:
-        print("MY PARTNER:" + str(partnerid))
-        context.bot.send_message(chat_id=partnerid, text=user['nickname'] + ": " + message)
-        print("MESSAGE SEND")
+        if check_profanity(message):
+            context.bot.send_message(chat_id=update.effective_chat.id, text="Your message contains inappropriate content. Please mind your language.")
+            return
+        else:
+            context.bot.send_message(chat_id=partnerid, text=user['nickname'] + ": " + message)
 
 # Define conversation handler for /begin command
 chat_handler = ConversationHandler(
