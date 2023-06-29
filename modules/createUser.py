@@ -21,7 +21,7 @@ user = {
     "partnerid": None,
     "available": False,
     "ageRange": None,
-    "challenge": None,
+    "concern": None,
     "reportedUsers": [],
     "pastPartners": {},
 }
@@ -54,8 +54,8 @@ def controller(update, context):
         InlineKeyboardButton(f"Student {'✅' if checkUser['student'] is not None else ''}", callback_data='student')],
         [InlineKeyboardButton(f"Nickname {'✅' if checkUser['nickname'] is not None else ''}", callback_data='nickname'),
         InlineKeyboardButton(f"Happiness {'✅' if checkUser['happiness'] is not None else ''}", callback_data='happiness')],
-        [InlineKeyboardButton(f"Age Range {'✅' if checkUser['ageRange'] is not None else ''}", callback_data='ageRange'),
-        InlineKeyboardButton(f"Challenge {'✅' if checkUser['challenge'] is not None else ''}", callback_data='challenge')],
+        [InlineKeyboardButton(f"Age {'✅' if checkUser['ageRange'] is not None else ''}", callback_data='ageRange'),
+        InlineKeyboardButton(f"Concerns {'✅' if checkUser['concern'] is not None else ''}", callback_data='concern')],
         [InlineKeyboardButton("Complete", callback_data='complete')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -118,22 +118,22 @@ def control_handler(update, context):
         context.bot.send_message(chat_id=update.effective_chat.id, text=f'__*{chosen_option.capitalize()}*__\n\nWhat is your age range?', reply_markup=age_markup, parse_mode='MarkdownV2')
         return AGEQN
     
-    if chosen_option == 'challenge':
-        challenge_keyboard = [
+    if chosen_option == 'concern':
+        concern_keyboard = [
             [InlineKeyboardButton("Family", callback_data="family"),
             InlineKeyboardButton("Social Life", callback_data="social")],
             [InlineKeyboardButton("Academics", callback_data="academics"),
             InlineKeyboardButton("Others", callback_data="others")],
             [InlineKeyboardButton("NA", callback_data="NA")]
         ]
-        challenge_markup = InlineKeyboardMarkup(challenge_keyboard)
-        context.bot.send_message(chat_id=update.effective_chat.id, text=f'__*{chosen_option.capitalize()}*__\n\nWhat is the biggest challenge that you are facing now?', reply_markup=challenge_markup, parse_mode='MarkdownV2')
+        concern_markup = InlineKeyboardMarkup(concern_keyboard)
+        context.bot.send_message(chat_id=update.effective_chat.id, text=f'__*{chosen_option.capitalize()}*__\n\nWhat is the biggest concern that you are facing now?', reply_markup=concern_markup, parse_mode='MarkdownV2')
         return CHALLENGEQN
     
     if chosen_option == 'complete':
         collection = db['messages']
         userComplete = collection.find_one({'userid': update.effective_chat.id})
-        if userComplete['gender'] is not None and userComplete['happiness'] is not None and userComplete['nickname'] is not None and userComplete['student'] is not None and userComplete['ageRange'] is not None and userComplete['challenge'] is not None:
+        if userComplete['gender'] is not None and userComplete['happiness'] is not None and userComplete['nickname'] is not None and userComplete['student'] is not None and userComplete['ageRange'] is not None and userComplete['concern'] is not None:
             return handle_completed(update, context)
         else:
             context.bot.send_message(chat_id=update.effective_chat.id, text='Please complete all fields before completing.')
@@ -183,11 +183,11 @@ def handle_ageqn(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for updating!")
     return controller(update, context)
 
-def handle_challengeqn(update, context):
+def handle_concernqn(update, context):
     query = update.callback_query
     chosen_option = query.data
     collection = db['messages']
-    collection.update_one({'userid': update.effective_chat.id}, {'$set': {'challenge': chosen_option}})
+    collection.update_one({'userid': update.effective_chat.id}, {'$set': {'concern': chosen_option}})
     context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for updating!")
     return controller(update, context)
     
@@ -198,7 +198,7 @@ def handle_completed(update, context):
     morethan = "\>"
     collection = db['messages']
     finUser = collection.find_one({'userid': user['userid']})
-    context.bot.send_message(chat_id=update.effective_chat.id, text=f"__*Completed*__\n\nAccount updated successfully\!\n\nUser ID: {finUser['userid']}\nStudent: {finUser['student']}\nNickname: {finUser['nickname']}\nGender: {finUser['gender']}\nHappiness: {finUser['happiness']} \nAge Range: {lessthan + '15' if finUser['ageRange'] == 0 else '16-18' if finUser['ageRange'] == 1 else '19-21' if finUser['ageRange'] == 2 else '22-25' if finUser['ageRange'] == 3 else morethan + '25'}\nChallenge: {finUser['challenge']}", parse_mode='MarkdownV2')
+    context.bot.send_message(chat_id=update.effective_chat.id, text=f"__*Completed*__\n\nAccount updated successfully\!\n\nUser ID: {finUser['userid']}\nStudent: {finUser['student']}\nNickname: {finUser['nickname']}\nGender: {finUser['gender']}\nHappiness: {finUser['happiness']} \nAge: {lessthan + '15' if finUser['ageRange'] == 0 else '16-18' if finUser['ageRange'] == 1 else '19-21' if finUser['ageRange'] == 2 else '22-25' if finUser['ageRange'] == 3 else morethan + '25'}\nConcern: {finUser['concern']}", parse_mode='MarkdownV2')
     context.bot.send_message(chat_id=update.effective_chat.id, text="Try to find a match now with /begin!")
     # # Adding to DB
     # collection = db['messages']
@@ -218,7 +218,7 @@ def handle_completed(update, context):
     # user['reportedUsers'] = []
     # user['partnerid'] = None
     # user['ageRange'] = None
-    # user['challenge'] = None
+    # user['concern'] = None
     return ConversationHandler.END
 
 def reset(update, context):
@@ -232,7 +232,7 @@ def reset(update, context):
                     "gender": None,
                     "happiness": None,
                     "ageRange": None,
-                    "challenge": None,
+                    "concern": None,
                 }
             }
     )
@@ -246,7 +246,7 @@ def reset(update, context):
     # user['reportedUsers'] = []
     # user['partnerid'] = None
     # user['ageRange'] = None
-    # user['challenge'] = None
+    # user['concern'] = None
     # if checkUser is not None:
     #     user['pastPartners'] = checkUser['pastPartners']
     #     user['reportedUsers'] = checkUser['reportedUsers']
@@ -264,7 +264,7 @@ creation_handler = ConversationHandler(
         NAMEQN: [MessageHandler(Filters.text, handle_nameqn)],
         HAPPINESSQN: [CallbackQueryHandler(handle_happinessqn)],
         AGEQN: [CallbackQueryHandler(handle_ageqn)],
-        CHALLENGEQN: [CallbackQueryHandler(handle_challengeqn)],
+        CHALLENGEQN: [CallbackQueryHandler(handle_concernqn)],
         
     },
     fallbacks=[CommandHandler("reset", reset)],

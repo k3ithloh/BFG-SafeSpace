@@ -60,7 +60,7 @@ def match_partner(update: Update, context):
     firstPartners = []
     NAPartners = []
     finalPartner = None
-    userChallenge = user['challenge']
+    userConcern = user['concern']
     userAgeRange = user['ageRange']
     for item in data:
         # logic to determine the suitable happiness level of chat partner
@@ -100,16 +100,16 @@ def match_partner(update: Update, context):
 def matching_algo(array, user):
     userHappiness = int(user['happiness'])
     userid = user['userid']
-    userChallenge = user['challenge']
+    userConcern = user['concern']
     userAgeRange = user['ageRange']
-    sameChallenge = []
+    sameConcern = []
     sameAgeRange = []
     currentArray = array
     for item in currentArray:
-        if item['challenge'] == userChallenge:
-            sameChallenge.append(item)
-    if len(sameChallenge) != 0:
-        currentArray = sameChallenge
+        if item['concern'] == userConcern:
+            sameConcern.append(item)
+    if len(sameConcern) != 0:
+        currentArray = sameConcern
     for item in currentArray:
         if int(item['ageRange']) - 1 <= int(userAgeRange) <= int(item['ageRange']) + 1:
             sameAgeRange.append(item)
