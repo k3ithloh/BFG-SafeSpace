@@ -26,6 +26,9 @@ client = discovery.build(
   static_discovery=False,
 )
 
+# Import badwords list
+with open('badwords.txt', 'r') as f:
+    bad_words = [word.strip().lower() for word in f.readlines()]
 
 def check_profanity(text):
     analyze_request = {
@@ -34,7 +37,7 @@ def check_profanity(text):
     }
     response = client.comments().analyze(body=analyze_request).execute()
     score = response['attributeScores']['TOXICITY']['summaryScore']['value']
-    return score > 0.7  # Change the threshold based on your requirements
+    return score > 0.70  # Change the threshold based on your requirements
 
 # Message handler
 def match_partner(update: Update, context):
@@ -179,10 +182,20 @@ def handle_message(update: Update, context):
         context.bot.send_message(chat_id=update.effective_chat.id, text="You have not been matched yet. Please use the command /begin to get matched first!")
         return ConversationHandler.END
     else:
-        if check_profanity(message):
-            context.bot.send_message(chat_id=update.effective_chat.id, text="Your message contains inappropriate content. Please mind your language.")
-            return
+        # Check if the message contains any bad words
+        if any(bad_word in message.lower() for bad_word in bad_words):
+            try:
+                # If the message contains a bad word, check it against the profanity API
+                if check_profanity(message): 
+                    # If the profanity API indicates the message is inappropriate, notify the sender
+                    context.bot.send_message(chat_id=update.effective_chat.id, text="Your message contains inappropriate content. Please mind your language.")
+                else:
+                    # If the profanity API indicates the message is okay, send it to the recipient
+                   context.bot.send_message(chat_id=partnerid, text=user['nickname'] + ": " + message)
+            except:  # ! catches rate limit exceptions as our Quota is 60 requests per minute
+                context.bot.send_message(chat_id=update.effective_chat.id, text="Your message contains inappropriate content. Please mind your language.")
         else:
+            # If the message does not contain any bad words, send it to the recipient
             context.bot.send_message(chat_id=partnerid, text=user['nickname'] + ": " + message)
 
 # Define conversation handler for /begin command
