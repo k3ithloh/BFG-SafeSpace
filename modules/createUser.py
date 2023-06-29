@@ -12,6 +12,7 @@ db = mongo_client['SafeSpaceDB']  # Replace 'your_database_name' with your desir
 
 # User Configuration
 user = {
+    "_id": None,
     "userid": None, # used to identify user and retrieve data from db on user
     "student": None, # future: if not student then its a counsellor 
     "nickname": None, 
@@ -38,13 +39,23 @@ def start(update, context):
     return ConversationHandler.END
 
 def controller(update, context):
+    collection = db['messages']
+    checkUser = collection.find_one({'userid': update.effective_chat.id})
+    if checkUser is None:
+        insertUser = user
+        insertUser['userid'] = update.effective_chat.id
+        insertUser['_id'] = update.effective_chat.id
+        collection.insert_one(
+            insertUser
+        )
+        checkUser = insertUser
     keyboard = [
-        [InlineKeyboardButton(f"Gender {'✅' if user['gender'] is not None else ''}", callback_data='gender'),
-        InlineKeyboardButton(f"Student {'✅' if user['student'] is not None else ''}", callback_data='student')],
-        [InlineKeyboardButton(f"Nickname {'✅' if user['nickname'] is not None else ''}", callback_data='nickname'),
-        InlineKeyboardButton(f"Happiness {'✅' if user['happiness'] is not None else ''}", callback_data='happiness')],
-        [InlineKeyboardButton(f"Age Range {'✅' if user['ageRange'] is not None else ''}", callback_data='ageRange'),
-        InlineKeyboardButton(f"Challenge {'✅' if user['challenge'] is not None else ''}", callback_data='challenge')],
+        [InlineKeyboardButton(f"Gender {'✅' if checkUser['gender'] is not None else ''}", callback_data='gender'),
+        InlineKeyboardButton(f"Student {'✅' if checkUser['student'] is not None else ''}", callback_data='student')],
+        [InlineKeyboardButton(f"Nickname {'✅' if checkUser['nickname'] is not None else ''}", callback_data='nickname'),
+        InlineKeyboardButton(f"Happiness {'✅' if checkUser['happiness'] is not None else ''}", callback_data='happiness')],
+        [InlineKeyboardButton(f"Age Range {'✅' if checkUser['ageRange'] is not None else ''}", callback_data='ageRange'),
+        InlineKeyboardButton(f"Challenge {'✅' if checkUser['challenge'] is not None else ''}", callback_data='challenge')],
         [InlineKeyboardButton("Complete", callback_data='complete')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -120,7 +131,9 @@ def control_handler(update, context):
         return CHALLENGEQN
     
     if chosen_option == 'complete':
-        if user['gender'] is not None and user['happiness'] is not None and user['nickname'] is not None and user['student'] is not None and user['ageRange'] is not None and user['challenge'] is not None:
+        collection = db['messages']
+        userComplete = collection.find_one({'userid': update.effective_chat.id})
+        if userComplete['gender'] is not None and userComplete['happiness'] is not None and userComplete['nickname'] is not None and userComplete['student'] is not None and userComplete['ageRange'] is not None and userComplete['challenge'] is not None:
             return handle_completed(update, context)
         else:
             context.bot.send_message(chat_id=update.effective_chat.id, text='Please complete all fields before completing.')
@@ -130,7 +143,8 @@ def control_handler(update, context):
 def handle_studentqn(update, context):
     query = update.callback_query
     chosen_option = query.data
-    user['student'] = chosen_option
+    collection = db['messages']
+    collection.update_one({'userid': update.effective_chat.id}, {'$set': {'student': chosen_option}})
     context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for updating!")
     return controller(update, context)
 
@@ -138,88 +152,106 @@ def handle_studentqn(update, context):
 def handle_genderqn(update, context):
     query = update.callback_query
     chosen_option = query.data
-    user['gender'] = chosen_option
+    collection = db['messages']
+    collection.update_one({'userid': update.effective_chat.id}, {'$set': {'gender': chosen_option}})
     context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for updating!")
     return controller(update, context)
 
 def handle_nameqn(update, context):
-    studentQuestion = update.message.text.strip()
-    if studentQuestion == '/cancel':
+    givenNickname = update.message.text.strip()
+    if givenNickname == '/cancel':
         cancel(update, context)
         return ConversationHandler.END
-    user['nickname'] = studentQuestion
+    collection = db['messages']
+    collection.update_one({'userid': update.effective_chat.id}, {'$set': {'nickname': givenNickname}})
     context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for updating!")
-    # track_conversation_history(update, context)
     return controller(update, context)
 
 def handle_happinessqn(update, context):
     query = update.callback_query
     chosen_option = query.data
-    user['happiness'] = chosen_option
+    collection = db['messages']
+    collection.update_one({'userid': update.effective_chat.id}, {'$set': {'happiness': chosen_option}})
     context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for updating!")
     return controller(update, context)
 
 def handle_ageqn(update, context):
     query = update.callback_query
     chosen_option = query.data
-    user['ageRange'] = chosen_option
+    collection = db['messages']
+    collection.update_one({'userid': update.effective_chat.id}, {'$set': {'ageRange': chosen_option}})
     context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for updating!")
     return controller(update, context)
 
 def handle_challengeqn(update, context):
     query = update.callback_query
     chosen_option = query.data
-    user['challenge'] = chosen_option
+    collection = db['messages']
+    collection.update_one({'userid': update.effective_chat.id}, {'$set': {'challenge': chosen_option}})
     context.bot.send_message(chat_id=update.effective_chat.id, text="Thank you for updating!")
     return controller(update, context)
     
 def handle_completed(update, context):
-    user['userid'] = update.effective_user.id
+    # user['userid'] = update.effective_user.id
     # Because i cannot put < > into f strings
     lessthan = "\<"
     morethan = "\>"
-    context.bot.send_message(chat_id=update.effective_chat.id, text=f"__*Completed*__\n\nAccount updated successfully\!\n\nUser ID: {user['userid']}\nStudent: {user['student']}\nNickname: {user['nickname']}\nGender: {user['gender']}\nHappiness: {user['happiness']} \nAge Range: {lessthan + '15' if user['ageRange'] == 0 else '16-18' if user['ageRange'] == 1 else '19-21' if user['ageRange'] == 2 else '22-25' if user['ageRange'] == 3 else morethan + '25'}\nChallenge: {user['challenge']}", parse_mode='MarkdownV2')
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Try to find a match now with /begin!")
-    # Adding to DB
     collection = db['messages']
-    checkUser = collection.find_one({'userid': user['userid']})
-    # Resetting user variable
-    if checkUser is not None:
-        user['pastPartners'] = checkUser['pastPartners']
-        user['reportedUsers'] = checkUser['reportedUsers']
-        user['partnerid'] = checkUser['partnerid']
-    collection.update_one({'userid': user['userid']}, {'$set': user}, upsert=True)
-    user['userid'] = None
-    user['student'] = None
-    user['nickname'] = None
-    user['gender'] = None
-    user['happiness'] = None
-    user['pastPartners'] = {}
-    user['reportedUsers'] = []
-    user['partnerid'] = None
-    user['ageRange'] = None
-    user['challenge'] = None
+    finUser = collection.find_one({'userid': user['userid']})
+    context.bot.send_message(chat_id=update.effective_chat.id, text=f"__*Completed*__\n\nAccount updated successfully\!\n\nUser ID: {finUser['userid']}\nStudent: {finUser['student']}\nNickname: {finUser['nickname']}\nGender: {finUser['gender']}\nHappiness: {finUser['happiness']} \nAge Range: {lessthan + '15' if finUser['ageRange'] == 0 else '16-18' if finUser['ageRange'] == 1 else '19-21' if finUser['ageRange'] == 2 else '22-25' if finUser['ageRange'] == 3 else morethan + '25'}\nChallenge: {finUser['challenge']}", parse_mode='MarkdownV2')
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Try to find a match now with /begin!")
+    # # Adding to DB
+    # collection = db['messages']
+    # checkUser = collection.find_one({'userid': user['userid']})
+    # # Resetting user variable
+    # if checkUser is not None:
+    #     user['pastPartners'] = checkUser['pastPartners']
+    #     user['reportedUsers'] = checkUser['reportedUsers']
+    #     user['partnerid'] = checkUser['partnerid']
+    # collection.update_one({'userid': user['userid']}, {'$set': user}, upsert=True)
+    # user['userid'] = None
+    # user['student'] = None
+    # user['nickname'] = None
+    # user['gender'] = None
+    # user['happiness'] = None
+    # user['pastPartners'] = {}
+    # user['reportedUsers'] = []
+    # user['partnerid'] = None
+    # user['ageRange'] = None
+    # user['challenge'] = None
     return ConversationHandler.END
 
-def cancel(update, context):
+def reset(update, context):
     collection = db['messages']
-    checkUser = collection.find_one({'userid': user['userid']})
+    collection.update_one(
+        {'userid': update.effective_chat.id}, 
+            {'$set': 
+                {
+                    "student": None,
+                    "nickname": None, 
+                    "gender": None,
+                    "happiness": None,
+                    "ageRange": None,
+                    "challenge": None,
+                }
+            }
+    )
     # Resetting user variable
-    user['userid'] = None
-    user['student'] = None
-    user['nickname'] = None
-    user['gender'] = None
-    user['happiness'] = None
-    user['pastPartners'] = {}
-    user['reportedUsers'] = []
-    user['partnerid'] = None
-    user['ageRange'] = None
-    user['challenge'] = None
-    if checkUser is not None:
-        user['pastPartners'] = checkUser['pastPartners']
-        user['reportedUsers'] = checkUser['reportedUsers']
-        user['partnerid'] = checkUser['partnerid']
-    context.bot.send_message(chat_id=update.effective_chat.id, text='Account setup cancelled.')
+    # user['userid'] = None
+    # user['student'] = None
+    # user['nickname'] = None
+    # user['gender'] = None
+    # user['happiness'] = None
+    # user['pastPartners'] = {}
+    # user['reportedUsers'] = []
+    # user['partnerid'] = None
+    # user['ageRange'] = None
+    # user['challenge'] = None
+    # if checkUser is not None:
+    #     user['pastPartners'] = checkUser['pastPartners']
+    #     user['reportedUsers'] = checkUser['reportedUsers']
+    #     user['partnerid'] = checkUser['partnerid']
+    context.bot.send_message(chat_id=update.effective_chat.id, text='Account setup reset.')
     return ConversationHandler.END
 
 
@@ -235,7 +267,7 @@ creation_handler = ConversationHandler(
         CHALLENGEQN: [CallbackQueryHandler(handle_challengeqn)],
         
     },
-    fallbacks=[CommandHandler("cancel", cancel)],
+    fallbacks=[CommandHandler("reset", reset)],
 )
 
 start_handler = ConversationHandler(
