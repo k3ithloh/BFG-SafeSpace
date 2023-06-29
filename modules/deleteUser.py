@@ -31,11 +31,11 @@ def handle_delete(update, context):
     if chosen_option == 'Yes':
         collection = db['messages']
         collection.delete_one({'userid': userid})
-        context.bot.send_message(chat_id=userid, text="Sad to see you go! Use /setup to create your account again!")
+        context.bot.send_message(chat_id=userid, text="We are really sorry to see you go! Do contact @tylerlian or @SeanTeo if you have any feedback on SafeSpace!\nYou may use /setup to create your account again.")
         return ConversationHandler.END
     
     if chosen_option == "No":
-        context.bot.send_message(chat_id=userid, text="Glad to see you're still here! Your account has not been deleted.")
+        context.bot.send_message(chat_id=userid, text="We are glad to see that you are still here! Your account has not been deleted.")
         return ConversationHandler.END
 
 

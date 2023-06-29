@@ -30,7 +30,7 @@ def start_report(update, context):
         [InlineKeyboardButton("Other", callback_data='other')]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    context.bot.send_message(chat_id=update.effective_chat.id, text="We are sorry to hear that you are affected by this. At any time you wish to cancel your report use /cancelreport")
+    context.bot.send_message(chat_id=update.effective_chat.id, text="We are sorry to hear that you are affected by this. If you wish to cancel your report at anytime, use /cancelreport")
 
     context.bot.send_message(chat_id=update.effective_chat.id, text="Please select a reason for reporting the user:", reply_markup=reply_markup)
 
@@ -41,7 +41,7 @@ def handle_reason_selection(update, context):
     report['reason'] = query.data
 
     # Request evidence from the reporter
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Please copy paste the text as evidence to support your report.")
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Please copy paste the specific text as evidence to support your report.")
     
     return REPORT_EVIDENCE
 
@@ -51,7 +51,7 @@ def handle_evidence(update, context):
     # Save the report details in the database (you need to implement the database functionality)
 
     # Notify the reporter that the report has been successfully submitted
-    update.message.reply_text("Thank you for your report. It has been successfully submitted.")
+    update.message.reply_text("Thank you for your report, it has been successfully submitted. We will review your report and take action accordingly.")
     report['reporter'] = update.effective_user.id
     user = userCollection.find_one({'userid': update.effective_user.id})
     partnerid = user['partnerid']
