@@ -159,8 +159,8 @@ def handle_genderqn(update, context):
 
 def handle_nameqn(update, context):
     givenNickname = update.message.text.strip()
-    if givenNickname == '/cancel':
-        cancel(update, context)
+    if givenNickname == '/reset':
+        reset(update, context)
         return ConversationHandler.END
     collection = db['messages']
     collection.update_one({'userid': update.effective_chat.id}, {'$set': {'nickname': givenNickname}})
