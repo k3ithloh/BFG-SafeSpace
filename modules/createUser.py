@@ -235,7 +235,7 @@ def handle_completed(update, context):
     morethan = "\>"
     collection = db['messages']
     finUser = collection.find_one({'userid': user['userid']})
-    context.bot.send_message(chat_id=update.effective_chat.id, text=f"__*Completed*__\n\nAccount updated successfully\!\n\nUser ID: {finUser['userid']}\nStudent: {finUser['student']}\nNickname: {finUser['nickname']}\nGender: {finUser['gender']}\nHappiness: {finUser['happiness']} \nAge: {lessthan + '15' if finUser['ageRange'] == 0 else '16-18' if finUser['ageRange'] == 1 else '19-21' if finUser['ageRange'] == 2 else '22-25' if finUser['ageRange'] == 3 else morethan + '25'}\nConcern: {finUser['concern']}", parse_mode='MarkdownV2')
+    context.bot.send_message(chat_id=update.effective_chat.id, text=f"__*Completed*__\n\nAccount updated successfully\!", parse_mode='MarkdownV2')
     context.bot.send_message(chat_id=update.effective_chat.id, text="Try to find a match now with /begin!")
     # # Adding to DB
     # collection = db['messages']
