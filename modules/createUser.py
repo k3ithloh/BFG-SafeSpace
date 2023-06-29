@@ -51,11 +51,11 @@ START, STUDENTQN, GENDERQN, NAMEQN, HAPPINESSQN, CONTROLLERHANDLER, AGEQN, CHALL
 def check_vulgarity(text):
     analyze_request = {
         'comment': { 'text': text },
-        'requestedAttributes': {'PROFANITY': {}}
+        'requestedAttributes': {'TOXICITY': {}}
     }
     response = client.comments().analyze(body=analyze_request).execute()
-    score = response['attributeScores']['PROFANITY']['summaryScore']['value']
-    return score > 0.70 
+    score = response['attributeScores']['TOXICITY']['summaryScore']['value']
+    return score > 0.65 
 
 # Start command handler
 def start(update, context):
