@@ -60,7 +60,7 @@ def check_vulgarity(text):
 # Start command handler
 def start(update, context):
     # state_history.clear()  # Clear state history when starting account change
-    context.bot.send_message(chat_id=update.effective_chat.id, text="Hello there! Welcome to SafeSpace 💆‍♂️💆‍♀️🏠, we are here to help you with all of your mental health related queries 😊. Please rest assured that in accordance with Singapore's Personal Data Protection Act, we will not be collecting any of your personal data. You can create your new account using /setup")
+    context.bot.send_message(chat_id=update.effective_chat.id, text="Hi there! Welcome to SafeSpace 💆‍♂️💆‍♀️🏠, we are here to help you with your mental health concerns 😊. Please rest assured that in accordance with Singapore's Personal Data Protection Act, we will not be collecting any of your personal data. You can create your new account using /setup")
     return ConversationHandler.END
 
 def controller(update, context):

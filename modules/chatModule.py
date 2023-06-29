@@ -169,8 +169,8 @@ def end_chat(update: Update, context):
     collection.update_one({'userid': partnerid}, {'$set': {'available': False}})
     collection.update_one({'userid': userid}, {'$set': {'partnerid': None, f'pastPartners.{partnerid}': datetime.now()}})
     collection.update_one({'userid': partnerid}, {'$set': {'partnerid': None, f'pastPartners.{userid}': datetime.now()}})
-    context.bot.send_message(chat_id=userid, text="Conversation cancelled. Please use /begin to look for a new partner!")
-    context.bot.send_message(chat_id=partnerid, text="Conversation cancelled. Please use /begin to look for a new partner!")
+    context.bot.send_message(chat_id=userid, text="Conversation cancelled. Please use /begin to look for a new partner again!")
+    context.bot.send_message(chat_id=partnerid, text="Conversation cancelled. Please use /begin to look for a new partner again!")
     return ConversationHandler.END
 
 def handle_message(update: Update, context):
