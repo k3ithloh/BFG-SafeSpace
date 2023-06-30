@@ -4,6 +4,7 @@ from pymongo import MongoClient
 from dotenv import load_dotenv
 from datetime import datetime
 import os
+import uuid
 load_dotenv()
 mongo_url = os.environ.get('MONGODB_URL')
 mongo_client = MongoClient(mongo_url)
@@ -11,6 +12,7 @@ db = mongo_client['SafeSpaceDB']
 userCollection = db['messages'] 
 reportCollection = db['reports']
 report = {
+    "_id": None,
     "reporter": None,
     "reportee": None,
     "reason": None,
@@ -46,7 +48,12 @@ def handle_reason_selection(update, context):
     return REPORT_EVIDENCE
 
 def handle_evidence(update, context):
-    evidence = update.message.text
+    evidence = None
+    if update.message and update.message.text:
+        evidence = update.message.text
+    else:
+        # Handle the case when there is no message or text
+        return ConversationHandler.END
     report["description"] = evidence
     # Save the report details in the database (you need to implement the database functionality)
 
@@ -61,6 +68,8 @@ def handle_evidence(update, context):
             '$set': {'partnerid': None, 'available': False},
             '$push': {'reportedUsers': partnerid}
         }, upsert=True)
+    
+    report['_id'] = str(update.effective_user.id) + str(partnerid)
     userCollection.update_one({'userid': partnerid}, {'$set': {'partnerid': None, 'available': False}, '$push': {'reportedUsers': update.effective_user.id}})
     context.bot.send_message(chat_id=update.effective_chat.id, text="Conversation cancelled. Please use /begin to look for a new partner again!")
     context.bot.send_message(chat_id=partnerid, text="Conversation cancelled. Please use /begin to look for a new partner again!")

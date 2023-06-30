@@ -182,7 +182,12 @@ def handle_genderqn(update, context):
     return controller(update, context)
 
 def handle_nameqn(update, context):
-    givenNickname = update.message.text.strip()
+    givenNickname = None
+    if update.message and update.message.text:
+        givenNickname = update.message.text.strip()
+    else:
+        # Handle the case when there is no message or text
+        return ConversationHandler.END
     if givenNickname == '/reset':
         reset(update, context)
         return ConversationHandler.END
