@@ -76,7 +76,9 @@ def match_partner(update: Update, context):
     ])
 
     # Getting most updated user details
-    user = collection.find_one({'userid': userid})
+    user = collection.find_one({'userid': update.effective_user.id})
+    if user is None:
+        return ConversationHandler.END
     # userHappiness = int(user['happiness'])
     pastPartners = user['pastPartners']
     secondPartners = []
@@ -128,6 +130,8 @@ def matching_algo(array, user):
     sameConcern = []
     sameAgeRange = []
     currentArray = array
+    print(userConcern)
+    print(userAgeRange)
     for item in currentArray:
         if item['concern'] == userConcern:
             sameConcern.append(item)
@@ -174,7 +178,13 @@ def end_chat(update: Update, context):
     return ConversationHandler.END
 
 def handle_message(update: Update, context):
-    message = update.message.text
+    message = None
+    if update.message and update.message.text:
+        message = update.message.text
+    else:
+        # Handle the case when there is no message or text
+        return ConversationHandler.END
+    # message = update.message.text
     userid = update.effective_user.id
     user = collection.find_one({'userid': userid})
     if user is None:
