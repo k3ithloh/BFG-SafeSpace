@@ -1,4 +1,4 @@
-# Build For Good - SafeSpace
+# [Build For Good - SafeSpace](https://www.build.gov.sg/projects/safespace/)
 
 SafeSpace, an anonymized digital peer support system using zero knowledge proof meant to help students in Singapore cope with the mental health challenges of they face.
 
